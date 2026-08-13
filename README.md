@@ -19,7 +19,7 @@
 ## Run
 
 ```bash
-dotnet restore
+dotnet restore --configfile NuGet.Config
 dotnet run --project src/TitleFlow.Api
 ```
 
