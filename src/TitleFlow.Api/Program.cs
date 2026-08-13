@@ -14,10 +14,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ITitleRepository, TitleRepository>();
 builder.Services.AddScoped<ITitleService, TitleService>();
 
-if (builder.Configuration.GetValue("Database:UseDemoData", true))
-    builder.Services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("TitleFlowDemo"));
-else
-    builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddCors(options => options.AddPolicy("Angular", policy => policy.WithOrigins(builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? ["http://localhost:4200"]).AllowAnyHeader().AllowAnyMethod()));
 
@@ -31,5 +28,4 @@ app.UseExceptionHandler(handler => handler.Run(async context =>
 }));
 if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
 app.UseHttpsRedirection(); app.UseCors("Angular"); app.MapControllers();
-using (var scope = app.Services.CreateScope()) if (builder.Configuration.GetValue("Database:UseDemoData", true)) await DemoDataSeeder.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>());
 app.Run();

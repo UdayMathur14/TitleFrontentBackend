@@ -23,4 +23,4 @@ dotnet restore --configfile NuGet.Config
 dotnet run --project src/TitleFlow.Api
 ```
 
-Swagger opens at `https://localhost:7184/swagger`. Demo mode uses seeded in-memory data, so no database setup is required. To use the existing SQL Server `TBL_TITLES` table, set `Database:UseDemoData` to `false` and update `ConnectionStrings:DefaultConnection`.
+Swagger opens at `https://localhost:7184/swagger`. The API connects to the existing SQL Server `SalesDataDB` database and reads `dbo.TBL_TITLES`. Update `ConnectionStrings:DefaultConnection` if SQL Server is hosted elsewhere.
