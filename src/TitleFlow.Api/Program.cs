@@ -8,7 +8,6 @@ using TitleFlow.Api.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMemoryCache();
@@ -30,7 +29,7 @@ app.UseExceptionHandler(handler => handler.Run(async context =>
     context.Response.StatusCode = status;
     await context.Response.WriteAsJsonAsync(new ProblemDetails { Status=status, Title=status==500?"Unexpected server error":exception?.Message, Detail=app.Environment.IsDevelopment()?exception?.StackTrace:null });
 }));
-if (app.Environment.IsDevelopment()) { app.MapOpenApi(); app.UseSwagger(); app.UseSwaggerUI(); }
+if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
 app.UseHttpsRedirection(); app.UseCors("Angular"); app.MapControllers();
 using (var scope = app.Services.CreateScope()) if (builder.Configuration.GetValue("Database:UseDemoData", true)) await DemoDataSeeder.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>());
 app.Run();
