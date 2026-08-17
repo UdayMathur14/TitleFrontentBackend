@@ -21,7 +21,7 @@ public sealed record TitleFilter(int Page = 1, int PageSize = 20, int? Id = null
 public sealed record PagedResult<T>(IReadOnlyList<T> Items, int Page, int PageSize, int TotalCount, int TotalPages);
 public sealed record DropdownData(IReadOnlyList<string> CodeReferences, IReadOnlyList<string> InvoiceNumbers, IReadOnlyList<string> Titles, IReadOnlyList<string> Years);
 public sealed record DashboardResponse(int TotalTitles, int CleanTitles, int BlockedTitles, int UploadedThisMonth, IReadOnlyList<TitleResponse> RecentTitles);
-public sealed record ImportRow(int RowNumber, string Title, string InvoiceNumber, string CodeReference, string TitleYear, string Category, string Message, string? BlockedByInvoiceNumber = null, string? BlockedByCodeReference = null);
+public sealed record ImportRow(int RowNumber, string Title, string InvoiceNumber, string CodeReference, string TitleYear, string Category, string Message, int? BlockedByRow = null, string? BlockedByInvoiceNumber = null, string? BlockedByCodeReference = null);
 public sealed record ImportPreview(string FileName, int TotalRows, int CleanCount, int BlockedCount, int InvalidCount, IReadOnlyList<ImportRow> Rows, string ImportToken);
-public sealed record ExistingTitle(int Id, string ReferenceTitle, string InvoiceNumber, string CodeReference, string TitleYear);
+public sealed record ExistingTitle(int Id, int RowNumber, string ReferenceTitle, string InvoiceNumber, string CodeReference, string TitleYear);
 public sealed record DashboardCounts(int Total, int Clean, int Blocked, int ThisMonth);

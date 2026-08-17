@@ -43,7 +43,7 @@ public sealed class TitleRepository(AppDbContext db) : ITitleRepository
         db.Titles.AsNoTracking().FirstOrDefaultAsync(x => x.ReferenceTitle == value && (!excludingId.HasValue || x.Id != excludingId), ct);
     public async Task<IReadOnlyList<ExistingTitle>> GetExistingTitlesAsync(CancellationToken ct) =>
         await db.Titles.AsNoTracking().Select(x => new ExistingTitle(
-            x.Id, x.ReferenceTitle ?? "", x.InvoiceNumber ?? "", x.CodeReference ?? "", x.TitleYear ?? "")).ToListAsync(ct);
+            x.Id, x.RowNumber, x.ReferenceTitle ?? "", x.InvoiceNumber ?? "", x.CodeReference ?? "", x.TitleYear ?? "")).ToListAsync(ct);
     public async Task<DropdownData> GetDropdownsAsync(string? search, int limit, CancellationToken ct)
     {
         var codes = db.Titles.AsNoTracking().Where(x => x.CodeReference != null).Select(x => x.CodeReference!);

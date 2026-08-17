@@ -123,7 +123,7 @@ public sealed class TitleService(ITitleRepository repository, IMemoryCache cache
             if (last - 1 > MaximumImportRows) throw new ArgumentException($"A maximum of {MaximumImportRows:N0} rows can be previewed at once.");
 
             var parsed = new List<ParsedImportRow>();
-            var normalizedInFile = new HashSet<string>(StringComparer.Ordinal);
+            var firstTitleInFile = new Dictionary<string, ParsedImportRow>(StringComparer.Ordinal);
             for (var number = 2; number <= last; number++)
             {
                 ct.ThrowIfCancellationRequested();
@@ -139,8 +139,17 @@ public sealed class TitleService(ITitleRepository repository, IMemoryCache cache
                     : !TitleRules.IsFinancialYear(year) ? "Invalid Financial Year"
                     : null;
                 var normalized = TitleRules.Normalize(title);
-                if (error is null && !normalizedInFile.Add(normalized)) error = "Duplicate in Excel";
-                parsed.Add(new(number, title, invoice, code, year, normalized, error));
+                ParsedImportRow? blockedBy = null;
+                if (error is null && firstTitleInFile.TryGetValue(normalized, out var first))
+                {
+                    error = "Duplicate in Excel";
+                    blockedBy = first;
+                }
+
+                var parsedRow = new ParsedImportRow(number, title, invoice, code, year, normalized, error,
+                    blockedBy?.RowNumber, blockedBy?.InvoiceNumber, blockedBy?.CodeReference);
+                parsed.Add(parsedRow);
+                if (error is null) firstTitleInFile.Add(normalized, parsedRow);
             }
 
             var existingRows = await repository.GetExistingTitlesAsync(ct);
@@ -269,11 +278,15 @@ public sealed class TitleService(ITitleRepository repository, IMemoryCache cache
     private static ImportRow ToImportRow(ParsedImportRow row, IReadOnlyDictionary<string, ExistingTitle> existing,
         IReadOnlySet<(string InvoiceNumber, string CodeReference, string TitleYear)> existingCombinations)
     {
+        if (row.Error == "Duplicate in Excel")
+            return new(row.RowNumber, row.Title, row.InvoiceNumber, row.CodeReference, row.TitleYear, "Blocked", row.Error,
+                row.BlockedByRow, row.BlockedByInvoiceNumber, row.BlockedByCodeReference);
         if (row.Error is not null) return new(row.RowNumber, row.Title, row.InvoiceNumber, row.CodeReference, row.TitleYear, "Invalid", row.Error);
         if (existingCombinations.Contains((row.InvoiceNumber, row.CodeReference, row.TitleYear)))
             return new(row.RowNumber, row.Title, row.InvoiceNumber, row.CodeReference, row.TitleYear, "Invalid", "Invoice with codeRef already exists");
         if (existing.TryGetValue(row.ReferenceTitle, out var match))
-            return new(row.RowNumber, row.Title, row.InvoiceNumber, row.CodeReference, row.TitleYear, "Blocked", "Blocked", match.InvoiceNumber, match.CodeReference);
+            return new(row.RowNumber, row.Title, row.InvoiceNumber, row.CodeReference, row.TitleYear, "Blocked", "Blocked",
+                match.RowNumber > 0 ? match.RowNumber : null, match.InvoiceNumber, match.CodeReference);
         return new(row.RowNumber, row.Title, row.InvoiceNumber, row.CodeReference, row.TitleYear, "Clean", "Clean");
     }
 
@@ -302,5 +315,6 @@ public sealed class TitleService(ITitleRepository repository, IMemoryCache cache
         value.ReferenceTitle ?? "", value.CreatedBy ?? "", value.CreatedOn);
 
     private sealed record ParsedImportRow(int RowNumber, string Title, string InvoiceNumber, string CodeReference,
-        string TitleYear, string ReferenceTitle, string? Error);
+        string TitleYear, string ReferenceTitle, string? Error, int? BlockedByRow = null,
+        string? BlockedByInvoiceNumber = null, string? BlockedByCodeReference = null);
 }
