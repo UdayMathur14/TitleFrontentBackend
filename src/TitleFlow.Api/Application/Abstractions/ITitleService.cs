@@ -9,7 +9,7 @@ public interface ITitleService
     Task<TitleResponse> CreateAsync(CreateTitleRequest request, CancellationToken ct);
     Task<TitleResponse?> UpdateAsync(int id, UpdateTitleRequest request, CancellationToken ct);
     Task<int> DeleteAsync(IEnumerable<int> ids, CancellationToken ct);
-    Task<DropdownData> GetDropdownsAsync(CancellationToken ct);
+    Task<DropdownData> GetDropdownsAsync(string? query, int limit, CancellationToken ct);
     Task<DashboardResponse> GetDashboardAsync(CancellationToken ct);
     Task<ImportPreview> PreviewImportAsync(IFormFile file, CancellationToken ct);
     Task<int> CommitImportAsync(string token, CancellationToken ct);

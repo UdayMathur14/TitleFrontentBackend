@@ -16,6 +16,8 @@ public sealed class TitlesController(ITitleService service) : ControllerBase
     public async Task<ActionResult<TitleResponse>> Get(int id, CancellationToken ct) => await service.GetAsync(id, ct) is { } title ? Ok(title) : NotFound();
 
     [HttpPost]
+    [ProducesResponseType<TitleResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TitleResponse>> Create(CreateTitleRequest request, CancellationToken ct)
     {
         var result = await service.CreateAsync(request, ct);
@@ -23,19 +25,26 @@ public sealed class TitlesController(ITitleService service) : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [ProducesResponseType<TitleResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TitleResponse>> Update(int id, UpdateTitleRequest request, CancellationToken ct) => await service.UpdateAsync(id, request, ct) is { } title ? Ok(title) : NotFound();
 
     [HttpDelete]
     public async Task<IActionResult> Delete(DeleteTitlesRequest request, CancellationToken ct) => Ok(new { deletedCount = await service.DeleteAsync(request.Ids, ct) });
 
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteOne(int id, CancellationToken ct) => Ok(new { deletedCount = await service.DeleteAsync([id], ct) });
+
     [HttpGet("dashboard")]
     public async Task<ActionResult<DashboardResponse>> Dashboard(CancellationToken ct) => Ok(await service.GetDashboardAsync(ct));
 
     [HttpGet("dropdowns")]
-    public async Task<ActionResult<DropdownData>> Dropdowns(CancellationToken ct) => Ok(await service.GetDropdownsAsync(ct));
+    public async Task<ActionResult<DropdownData>> Dropdowns([FromQuery] string? query = null, [FromQuery] int limit = 10_000, CancellationToken ct = default) =>
+        Ok(await service.GetDropdownsAsync(query, limit, ct));
 
     [HttpPost("import/preview")]
-    [RequestSizeLimit(200 * 1024 * 1024)]
+    [RequestSizeLimit(50 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 50 * 1024 * 1024)]
     public async Task<ActionResult<ImportPreview>> Preview(IFormFile file, CancellationToken ct) => Ok(await service.PreviewImportAsync(file, ct));
 
     [HttpPost("import/commit")]

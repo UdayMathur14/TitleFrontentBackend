@@ -10,8 +10,13 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     {
         var title = modelBuilder.Entity<TitleRecord>();
         title.HasKey(x => x.Id);
-        title.Property(x => x.CreatedOn).HasConversion(v => v.ToDateTime(TimeOnly.MinValue), v => DateOnly.FromDateTime(v));
-        title.HasIndex(x => x.ReferenceTitle);
-        title.HasIndex(x => new { x.InvoiceNumber, x.CodeReference, x.TitleYear });
+        title.Property(x => x.Id).ValueGeneratedOnAdd();
+        title.Property(x => x.InvoiceNumber).HasMaxLength(250).IsUnicode(false);
+        title.Property(x => x.CodeReference).HasMaxLength(220).IsUnicode(false);
+        title.Property(x => x.Title).HasMaxLength(1200);
+        title.Property(x => x.CreatedBy).HasMaxLength(240);
+        title.Property(x => x.Status).HasMaxLength(300);
+        title.Property(x => x.ReferenceTitle).HasMaxLength(700).IsUnicode(false);
+        title.Property(x => x.TitleYear).HasMaxLength(204).IsUnicode(false);
     }
 }
