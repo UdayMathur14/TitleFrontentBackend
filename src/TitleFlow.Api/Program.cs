@@ -20,6 +20,9 @@ builder.Services.AddResponseCompression(options => options.EnableForHttps = true
 builder.Services.AddSingleton<TitleCache>();
 builder.Services.AddScoped<ITitleRepository, TitleRepository>();
 builder.Services.AddScoped<ITitleService, TitleService>();
+builder.Services.AddSingleton<PublicationTitleCache>();
+builder.Services.AddScoped<IPublicationTitleRepository, PublicationTitleRepository>();
+builder.Services.AddScoped<IPublicationTitleService, PublicationTitleService>();
 builder.Services.Configure<FormOptions>(options => options.MultipartBodyLengthLimit = 50 * 1024 * 1024);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -38,6 +41,7 @@ app.UseExceptionHandler(handler => handler.Run(async context =>
         ArgumentException => StatusCodes.Status400BadRequest,
         KeyNotFoundException => StatusCodes.Status404NotFound,
         TitleConflictException => StatusCodes.Status409Conflict,
+        PublicationTitleConflictException => StatusCodes.Status409Conflict,
         DbUpdateConcurrencyException => StatusCodes.Status409Conflict,
         DbUpdateException => StatusCodes.Status409Conflict,
         _ when HasSqlException(exception) => StatusCodes.Status503ServiceUnavailable,
