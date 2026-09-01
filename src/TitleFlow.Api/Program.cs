@@ -30,7 +30,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString,
     sql => sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(2), null)));
 
-builder.Services.AddCors(options => options.AddPolicy("Angular", policy => policy.WithOrigins(builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? ["http://localhost:4200", "http://192.168.29.101:96"]).AllowAnyHeader().AllowAnyMethod()));
+builder.Services.AddCors(options => options.AddPolicy("Angular", policy => policy.WithOrigins(builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? ["http://localhost:4200", "http://192.168.29.101:9001"]).AllowAnyHeader().AllowAnyMethod()));
 
 var app = builder.Build();
 app.UseExceptionHandler(handler => handler.Run(async context =>
