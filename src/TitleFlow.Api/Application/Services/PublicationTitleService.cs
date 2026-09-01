@@ -68,6 +68,33 @@ public sealed class PublicationTitleService(
                 counts.ThisMonth, recent.Select(Map).ToList());
         });
 
+    public Task<PublicationOverviewResponse> GetOverviewAsync(CancellationToken ct) =>
+        publicationCache.GetOrCreateAsync("overview", TimeSpan.FromSeconds(30), async () =>
+        {
+            var today = DateTime.Today;
+            var monthStart = new DateOnly(today.Year, today.Month, 1);
+            var counts = await repository.GetOverviewCountsAsync(monthStart, ct);
+            var yearBreakdown = await repository.GetYearOverviewAsync(8, ct);
+            var recent = await repository.GetRecentAsync(6, ct);
+            var modifiedPercentage = counts.TotalTitles == 0
+                ? 0m
+                : Math.Round(counts.ModifiedTitles * 100m / counts.TotalTitles, 2);
+
+            return new PublicationOverviewResponse(
+                counts.TotalTitles,
+                counts.CleanTitles,
+                counts.ModifiedTitles,
+                Math.Max(0, counts.TotalTitles - counts.ModifiedTitles),
+                counts.UploadedThisMonth,
+                counts.UniqueLotNumbers,
+                counts.UniquePaperIds,
+                counts.UniqueCodeReferences,
+                counts.FinancialYears,
+                modifiedPercentage,
+                yearBreakdown,
+                recent.Select(Map).ToList());
+        });
+
     public async Task<PublicationImportPreview> PreviewImportAsync(IFormFile file, CancellationToken ct)
     {
         ValidateWorkbook(file);

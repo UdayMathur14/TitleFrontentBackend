@@ -26,7 +26,9 @@ The public contract calls `InvoiceNumber` **Lot Number**.
 - `GET /api/publication-titles/modified` — records with an updated title
 - `GET /api/publication-titles/{id}` — publication title detail
 - `DELETE /api/publication-titles/{id}` and `DELETE /api/publication-titles` — single/bulk delete
-- `GET /api/publication-titles/dashboard` and `/dropdowns` — screen support data
+- `GET /api/publication-titles/dashboard` — basic dashboard metrics
+- `GET /api/publication-titles/overview` — rich overview cards, unique counts, year breakdown, and recent titles
+- `GET /api/publication-titles/dropdowns` — screen filter data
 - `POST /api/publication-titles/import/preview` and `/import/commit` — validate then save clean publication rows
 - `POST /api/publication-titles/modified/import/preview` and `/modified/import/commit` — validate then apply updated titles
 - `GET /api/publication-titles/template` and `/modified/template` — Excel templates

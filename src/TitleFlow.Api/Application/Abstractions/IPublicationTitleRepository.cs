@@ -15,6 +15,8 @@ public interface IPublicationTitleRepository
     Task<IReadOnlyList<PublicationTitleRecord>> GetRecentAsync(int count, CancellationToken ct);
     Task<(int Total, int Clean, int Modified, int ThisMonth)> GetDashboardCountsAsync(
         DateOnly monthStart, CancellationToken ct);
+    Task<PublicationOverviewCounts> GetOverviewCountsAsync(DateOnly monthStart, CancellationToken ct);
+    Task<IReadOnlyList<PublicationYearOverview>> GetYearOverviewAsync(int limit, CancellationToken ct);
     Task<PublicationDropdownData> GetDropdownsAsync(CancellationToken ct);
     Task AddRangeAsync(IEnumerable<PublicationTitleRecord> records, CancellationToken ct);
     Task<int> DeleteAsync(IReadOnlyCollection<int> ids, CancellationToken ct);

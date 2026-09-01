@@ -37,6 +37,10 @@ public sealed class PublicationTitlesController(IPublicationTitleService service
     public async Task<ActionResult<PublicationDashboardResponse>> Dashboard(CancellationToken ct) =>
         Ok(await service.GetDashboardAsync(ct));
 
+    [HttpGet("overview")]
+    public async Task<ActionResult<PublicationOverviewResponse>> Overview(CancellationToken ct) =>
+        Ok(await service.GetOverviewAsync(ct));
+
     [HttpGet("dropdowns")]
     public async Task<ActionResult<PublicationDropdownData>> Dropdowns(CancellationToken ct) =>
         Ok(await service.GetDropdownsAsync(ct));

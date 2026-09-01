@@ -10,6 +10,7 @@ public interface IPublicationTitleService
     Task<int> DeleteAsync(IEnumerable<int> ids, CancellationToken ct);
     Task<PublicationDropdownData> GetDropdownsAsync(CancellationToken ct);
     Task<PublicationDashboardResponse> GetDashboardAsync(CancellationToken ct);
+    Task<PublicationOverviewResponse> GetOverviewAsync(CancellationToken ct);
     Task<PublicationImportPreview> PreviewImportAsync(IFormFile file, CancellationToken ct);
     Task<int> CommitImportAsync(CommitPublicationImportRequest request, CancellationToken ct);
     Task<ModifiedPublicationImportPreview> PreviewModifiedImportAsync(IFormFile file, CancellationToken ct);

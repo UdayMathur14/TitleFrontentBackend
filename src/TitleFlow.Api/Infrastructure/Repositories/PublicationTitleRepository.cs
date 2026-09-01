@@ -55,6 +55,48 @@ public sealed class PublicationTitleRepository(AppDbContext db) : IPublicationTi
         return counts is null ? (0, 0, 0, 0) : (counts.Total, counts.Clean, counts.Modified, counts.ThisMonth);
     }
 
+    public async Task<PublicationOverviewCounts> GetOverviewCountsAsync(
+        DateOnly monthStart, CancellationToken ct)
+    {
+        var counts = await db.PublicationTitles.AsNoTracking().GroupBy(_ => 1).Select(group =>
+            new PublicationOverviewCounts(
+                group.Count(),
+                group.Count(x => x.Status == "Clean"),
+                group.Count(x => x.UpdatedTitle != null),
+                group.Count(x => x.CreatedOn >= monthStart),
+                group.Where(x => x.InvoiceNumber != null && x.InvoiceNumber != "")
+                    .Select(x => x.InvoiceNumber).Distinct().Count(),
+                group.Where(x => x.PaperId != null && x.PaperId != "")
+                    .Select(x => x.PaperId).Distinct().Count(),
+                group.Where(x => x.CodeReference != null && x.CodeReference != "")
+                    .Select(x => x.CodeReference).Distinct().Count(),
+                group.Where(x => x.TitleYear != null && x.TitleYear != "")
+                    .Select(x => x.TitleYear).Distinct().Count()))
+            .SingleOrDefaultAsync(ct);
+
+        return counts ?? new PublicationOverviewCounts(0, 0, 0, 0, 0, 0, 0, 0);
+    }
+
+    public async Task<IReadOnlyList<PublicationYearOverview>> GetYearOverviewAsync(
+        int limit, CancellationToken ct)
+    {
+        var rows = await db.PublicationTitles.AsNoTracking()
+            .Where(x => x.TitleYear != null && x.TitleYear != "")
+            .GroupBy(x => x.TitleYear!)
+            .Select(group => new
+            {
+                TitleYear = group.Key,
+                TotalTitles = group.Count(),
+                ModifiedTitles = group.Sum(x => x.UpdatedTitle != null ? 1 : 0)
+            })
+            .OrderByDescending(x => x.TitleYear)
+            .Take(Math.Clamp(limit, 1, 20))
+            .ToListAsync(ct);
+
+        return rows.Select(x => new PublicationYearOverview(
+            x.TitleYear, x.TotalTitles, x.ModifiedTitles)).ToList();
+    }
+
     public async Task<PublicationDropdownData> GetDropdownsAsync(CancellationToken ct) => new(
         await db.PublicationTitles.AsNoTracking().Where(x => x.CodeReference != null)
             .Select(x => x.CodeReference!).Distinct().OrderBy(x => x).ToListAsync(ct),

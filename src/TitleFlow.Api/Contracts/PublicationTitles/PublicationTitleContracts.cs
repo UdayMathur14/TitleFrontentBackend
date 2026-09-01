@@ -50,3 +50,15 @@ public sealed record CommitModifiedPublicationImportRequest(
 
 public sealed record PublicationDashboardResponse(int TotalTitles, int CleanTitles,
     int ModifiedTitles, int UploadedThisMonth, IReadOnlyList<PublicationTitleResponse> RecentTitles);
+
+public sealed record PublicationOverviewCounts(int TotalTitles, int CleanTitles, int ModifiedTitles,
+    int UploadedThisMonth, int UniqueLotNumbers, int UniquePaperIds, int UniqueCodeReferences,
+    int FinancialYears);
+
+public sealed record PublicationYearOverview(string TitleYear, int TotalTitles, int ModifiedTitles);
+
+public sealed record PublicationOverviewResponse(int TotalTitles, int CleanTitles, int ModifiedTitles,
+    int OriginalTitles, int UploadedThisMonth, int UniqueLotNumbers, int UniquePaperIds,
+    int UniqueCodeReferences, int FinancialYears, decimal ModifiedPercentage,
+    IReadOnlyList<PublicationYearOverview> YearBreakdown,
+    IReadOnlyList<PublicationTitleResponse> RecentTitles);
